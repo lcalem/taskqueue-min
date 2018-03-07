@@ -1,0 +1,53 @@
+version: '2'
+
+services:
+  mongo:
+    image: mongo:3.4
+    networks:
+      - overlay
+
+  redis:
+    image: redis:4.0.5-alpine
+    networks:
+      - overlay
+
+  tq-scheduler:
+    image: taskqueue_worker:latest
+    environment:
+      - "MRQ_REDIS=redis://redis:6379"
+      - "MRQ_MONGODB_JOBS=mongodb://mongo:27017/mrq"
+      - "MRQ_SCHEDULER=True"
+    networks:
+      - overlay
+
+  tq-worker:
+    image: taskqueue_worker:latest
+    working_dir: /src
+    environment:
+      - "MRQ_REDIS=redis://redis:6379"
+      - "MRQ_MONGODB_JOBS=mongodb://mongo:27017/mrq"
+      - "WORKER_GREENLETS=1"
+      - "WORKER_QUEUES=test1,test2,default"
+    networks:
+      - overlay
+
+  tq-api:
+    image: taskqueue_api:latest
+    environment:
+      - "MRQ_REDIS=redis://redis:6379"
+      - "MRQ_MONGODB_JOBS=mongodb://mongo:27017/mrq"
+      - "MRQ_USE_LARGE_JOB_IDS=False"
+    networks:
+      - overlay
+
+  # Maybe find a better way to mount volumes!
+  test:
+    image: taskqueue_tests:latest
+    volumes:
+      - ../../tests:/tests:rw
+      - ../../src:/src:ro
+    networks:
+        - overlay
+
+networks:
+    overlay:

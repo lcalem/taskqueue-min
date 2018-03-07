@@ -1,0 +1,27 @@
+FROM python:3.6
+
+ADD docker/requirements/debian-requirements-dev.txt .
+RUN DEBIAN_FRONTEND=noninteractive apt-get update --fix-missing && \
+    DEBIAN_PACKAGES=$(egrep -v "^\s*(#|$)" debian-requirements.txt) && \
+    apt-get install -y --force-yes $DEBIAN_PACKAGES && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm debian-requirements.txt
+
+ADD docker/requirements/requirements.txt .
+RUN pip3 install -r requirements.txt && \
+    rm requirements.txt
+
+ADD docker/requirements/requirements-tests.txt .
+RUN pip3 install -r requirements-tests.txt && \
+    rm requirements-tests.txt
+
+WORKDIR /
+
+COPY src/ /src
+
+ENV PYTHONPATH $PYTHONPATH:/src:/tests
+
+ADD docker/entrypoints/docker-entrypoint-idle.sh /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]

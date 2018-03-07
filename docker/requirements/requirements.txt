@@ -1,0 +1,4 @@
+redis
+pymongo
+requests
+-e git+https://github.com/pricingassistant/mrq.git@f6073548328a982a36dd590ffdc7e434442465e2#egg=mrq-master
