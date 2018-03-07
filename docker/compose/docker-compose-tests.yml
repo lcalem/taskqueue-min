@@ -40,6 +40,16 @@ services:
     networks:
       - overlay
 
+  tq-dashboard:
+    image: taskqueue_dashboard:latest
+    environment:
+      - "MRQ_REDIS=redis://redis:6379"
+      - "MRQ_MONGODB_JOBS=mongodb://mongo:27017/mrq"
+    ports:
+      - "5555:5555"
+    networks:
+      - overlay
+
   # Maybe find a better way to mount volumes!
   test:
     image: taskqueue_tests:latest
